@@ -1,6 +1,6 @@
 # CNA
 
-# learning path to walk through
+## learning path to walk through
 - k3s : install as a simpl kubernetes
   - one node in every AZ
   - master on all nodes
