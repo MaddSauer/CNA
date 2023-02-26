@@ -10,3 +10,5 @@ curl -sfL https://get.k3s.io | K3S_URL=https://swfs-01:6443 K3S_TOKEN=SECRET sh 
 
 # all nodes
 setfacl -m u:fedora:rw /etc/rancher/k3s/k3s.yaml
+
+# README => https://docs.k3s.io/cluster-access
