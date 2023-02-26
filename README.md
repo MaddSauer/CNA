@@ -1,6 +1,29 @@
 # CNA
 
-path of discovery
+# learning path to walk through
+- k3s : install as a simpl kubernetes
+  - one node in every AZ
+  - master on all nodes
+- swfs : install as k8s deployment first simple setup
+  - 3 master
+  - 3 volume
+  - 1 filer
+  - add swfs-storage class
+- prometheus operator : install
+- prometheus : install
+- grafana : 
+  - install grafana itself
+  - swfs : extend deployment with enabled metrics
+  - swfs : deploy swfs grafana template
+- CockroachDB
+  - swfs : extend deploymant for CRDB
+  - CRDB : deploy
+  
+
+
+
+---
+Old path - obsolete
 
 swfs:
 - VM
