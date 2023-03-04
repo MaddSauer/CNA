@@ -3,7 +3,7 @@
 # 2023-02-25  madd  init
 
 dnf -y update
-dnf -y install vim tmux wget atop htop etckeeper acl helm s3fs-fuse
+dnf -y install vim tmux wget atop htop etckeeper acl helm s3fs-fuse s3cmd
 etckeeper init
 etckeeper commit init
 
