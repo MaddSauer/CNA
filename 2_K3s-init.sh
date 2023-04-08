@@ -8,41 +8,47 @@
 curl -sfL https://get.k3s.io | sh -s - server --cluster-init --disable traefik --write-kubeconfig-mode 644
 
 # server node 1 (cilium)
-curl -sfL https://get.k3s.io | sh -s - server --cluster-init --disable traefik --write-kubeconfig-mode 644 --flannel-backend=none --no-flannel
-kubectl create -f https://raw.githubusercontent.com/cilium/cilium/v1.8/install/kubernetes/quick-install.yaml
-cat <<EOF | sudo tee /etc/systemd/system/sys-fs-bpf.mount
-[Unit]
-Description=Cilium BPF mounts
-Documentation=https://docs.cilium.io/
-DefaultDependencies=no
-Before=local-fs.target umount.target
-After=swap.target
+curl -sfL https://get.k3s.io | sh -s - server --server --cluster-init  https://$HOSTNAME:6443 \
+  --tls-san $publicDnsName \
+  --tls-san $publicIP \
+  --disable traefik \
+  --write-kubeconfig-mode 644 \
+  --flannel-backend=none \
+  --disable flannel \
+  --disable-network-policy
 
-[Mount]
-What=bpffs
-Where=/sys/fs/bpf
-Type=bpf
-Options=rw,nosuid,nodev,noexec,relatime,mode=700
+# example:
+# curl -sfL https://get.k3s.io | sh -s - server --server --cluster-init  https://devobssecops-01:6443 --tls-san doso01.cna.madd-sauer.cloud --tls-san 193.148.166.50 --disable traefik --write-kubeconfig-mode 644 --flannel-backend=none --disable flannel --disable-network-policy
 
-[Install]
-WantedBy=multi-user.target
-EOF
-# TODO create daemonset to deploy on every node.
+CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/master/stable.txt)
+CLI_ARCH=amd64
+if [ "$(uname -m)" = "aarch64" ]; then CLI_ARCH=arm64; fi
+curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
+sudo tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin
+rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
 
-# cilium on CRIO systems
-helm repo add cilium https://helm.cilium.io/
-helm install cilium cilium/cilium --version 1.8.13 \
-  --namespace kube-system \
-  --set global.containerRuntime.integration=crio
+cilium install
+
+cilium status --wait
+
+# ingress controller
+# - disable traefik
+# - install ingress nginx
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
 
 
+# --------------------
+# add additional nodes
+# --------------------
 
 # server node 2 + 3
-curl -sfL https://get.k3s.io | K3S_URL=https://swfs-01:6443 K3S_TOKEN=$SECRET sh -s - server --server https://swfs-01:6443 --disable traefik --write-kubeconfig-mode 644
+curl -sfL https://get.k3s.io | K3S_TOKEN=$SECRET sh -s - server --server https://swfs-01:6443 --disable traefik --write-kubeconfig-mode 644
 
 
 # server node 2 + 3 (cilium)
-curl -sfL https://get.k3s.io | K3S_URL=https://swfs-01:6443 K3S_TOKEN=$SECRET sh -s - server --server https://swfs-01:6443 --disable traefik --write-kubeconfig-mode 644 --flannel-backend=none --no-flannel
+curl -sfL https://get.k3s.io | sh -s - server --server --cluster-init https://$HOSTNAME:6443 --disable traefik --write-kubeconfig-mode 644 --flannel-backend=none --disable flannel --tls-san $publicIP --tls-san $publicHostname
 
 # agent node
 # TBD
