@@ -46,5 +46,4 @@ Todo:
     * configure cockroachdb to use swfs as storage
   * configure swfs to use s3 in the backend
   * backup filecontent of volumes with restic
-  * 
-    
+  * Cilium: https://docs.cilium.io/en/v1.8/gettingstarted/k3s/    
