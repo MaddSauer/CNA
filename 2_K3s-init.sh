@@ -36,7 +36,33 @@ cilium status --wait
 # - disable traefik
 # - install ingress nginx
 
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+# first step
+# kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+
+# helm looks like somehow better 
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+helm install quickstart ingress-nginx/ingress-nginx
+
+# also install a kubectl plugin for this one
+kubectl krew install ingress-nginx
+
+
+# deploy demo-app kuard 
+kubectl apply -f kuard/.
+
+# deploy cert-manager
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.crds.yaml
+
+helm install \
+  cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --version v1.11.0 
+
+
 
 
 # --------------------
