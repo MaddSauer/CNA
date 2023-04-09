@@ -79,6 +79,9 @@ helm install cert-manager jetstack/cert-manager \
 
 kubectl apply -f cert-manager/cluster-issuer.yaml
 
+# krew
+kubectl krew install cert-manager
+
 ############
 # prometheus
 ############
