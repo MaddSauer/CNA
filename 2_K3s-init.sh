@@ -20,6 +20,17 @@ curl -sfL https://get.k3s.io | sh -s - server --server --cluster-init  https://$
 # example:
 # curl -sfL https://get.k3s.io | sh -s - server --server --cluster-init  https://devobssecops-01:6443 --tls-san doso01.cna.madd-sauer.cloud --tls-san 193.148.166.50 --disable traefik --write-kubeconfig-mode 644 --flannel-backend=none --disable flannel --disable-network-policy
 
+###############
+# Storage Class
+###############
+
+# use the build in local-path for the first steps
+
+
+####################
+# CNI Cilium Network
+####################
+
 CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/master/stable.txt)
 CLI_ARCH=amd64
 if [ "$(uname -m)" = "aarch64" ]; then CLI_ARCH=arm64; fi
@@ -30,48 +41,51 @@ rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
 
 cilium install
 cilium status --wait
+# krew
 kubectl krew install cilium
 
+####################
 # ingress controller
+####################
 # - disable traefik
 # - install ingress nginx
 
-# prometheus
-# inpired by https://dev.to/kaitoii11/deploy-prometheus-monitoring-stack-to-kubernetes-with-a-single-helm-chart-2fbd
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-kubectl create ns prometheus
-helm install prometheus prometheus-community/kube-prometheus-stack -n prometheus
-
-
-
-# first step
-# kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+# document the files that hast to deleted.
+sudo rm -f /var/lib/rancher/k3s/server/manifests/traefik.yaml
 
 # helm looks like somehow better 
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
 helm install quickstart ingress-nginx/ingress-nginx
 
-# also install a kubectl plugin for this one
+# krew
 kubectl krew install ingress-nginx
-
 
 # deploy demo-app kuard 
 kubectl apply -f kuard/.
 
-# deploy cert-manager
+##############
+# cert-manager
+##############
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.crds.yaml
-
-helm install \
-  cert-manager jetstack/cert-manager \
+kubectl create namespace cert-manager
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.11.1/cert-manager.crds.yaml
+helm install cert-manager jetstack/cert-manager \
   --namespace cert-manager \
-  --create-namespace \
-  --version v1.11.0 
+  --version v1.11.1 \
+  --set ingressShim.defaultIssuerName=letsencrypt-staging \
+  --set ingressShim.defaultIssuerKind=ClusterIssuer
 
+kubectl apply -f cert-manager/cluster-issuer.yaml
 
-
+############
+# prometheus
+############
+# inpired by https://dev.to/kaitoii11/deploy-prometheus-monitoring-stack-to-kubernetes-with-a-single-helm-chart-2fbd
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+kubectl create ns prometheus
+helm install prometheus prometheus-community/kube-prometheus-stack -n prometheus
 
 # --------------------
 # add additional nodes
