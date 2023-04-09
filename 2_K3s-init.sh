@@ -29,17 +29,18 @@ sudo tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin
 rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
 
 cilium install
-
 cilium status --wait
+kubectl krew install cilium
 
 # ingress controller
 # - disable traefik
 # - install ingress nginx
 
 # prometheus
-LATEST=$(curl -s https://api.github.com/repos/prometheus-operator/prometheus-operator/releases/latest | jq -cr .tag_name)
-curl -sL https://github.com/prometheus-operator/prometheus-operator/releases/download/${LATEST}/bundle.yaml | kubectl create -f -
-
+# inpired by https://dev.to/kaitoii11/deploy-prometheus-monitoring-stack-to-kubernetes-with-a-single-helm-chart-2fbd
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+kubectl create ns prometheus
+helm install prometheus prometheus-community/kube-prometheus-stack -n prometheus
 
 
 
