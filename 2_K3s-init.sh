@@ -48,7 +48,7 @@ kubectl krew install cilium
 # ingress controller
 ####################
 # - disable traefik
-# - install ingress nginx
+# - install ingress nginx (quickstart)
 
 # document the files that hast to deleted.
 sudo rm -f /var/lib/rancher/k3s/server/manifests/traefik.yaml
@@ -56,10 +56,10 @@ sudo rm -f /var/lib/rancher/k3s/server/manifests/traefik.yaml
 # helm looks like somehow better 
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
-helm install quickstart ingress-nginx/ingress-nginx
+helm install quickstart ingress-nginx/ingress-nginx # good idea?
 
 # krew
-kubectl krew install ingress-nginx
+kubectl krew install ingress-nginx # seem not compatible with quickstart
 
 # deploy demo-app kuard 
 kubectl apply -f kuard/.
@@ -89,6 +89,10 @@ kubectl krew install cert-manager
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 kubectl create ns prometheus
 helm install prometheus prometheus-community/kube-prometheus-stack -n prometheus
+
+# additional links to may look at.
+# https://blog.container-solutions.com/prometheus-operator-beginners-guide
+
 
 # --------------------
 # add additional nodes

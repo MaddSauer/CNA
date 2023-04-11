@@ -1,0 +1,21 @@
+global:
+  hosts:
+    domain: doso01.cna.madd-sauer.cloud
+  ingress:
+    configureCertmanager: true
+    class: "nginx"
+  externalIP: 193.148.166.50
+
+gitlab:
+  gitlab-runner:
+    install: false
+
+certmanager-issuer:
+  email: cna-dev@madd-sauer.cloud
+
+nginx-ingress:
+  enabled: false
+
+cert-manager:
+  install: false
+
