@@ -55,8 +55,13 @@ sudo rm -f /var/lib/rancher/k3s/server/manifests/traefik.yaml
 
 # helm looks like somehow better 
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-helm repo update
-helm install quickstart ingress-nginx/ingress-nginx # good idea?
+#helm repo update
+#helm install quickstart ingress-nginx/ingress-nginx # good idea?
+
+helm upgrade --install ingress-nginx ingress-nginx \
+  --repo https://kubernetes.github.io/ingress-nginx \
+  --namespace ingress-nginx --create-namespace
+
 
 # krew
 kubectl krew install ingress-nginx # seem not compatible with quickstart
@@ -118,3 +123,8 @@ curl -sfL https://get.k3s.io | K3S_URL=https://swfs-01:6443 K3S_TOKEN=$SECRET sh
 # => https://docs.k3s.io/storage (nice to know, but i think we dont need / use it.)
 #
 
+# check-out the following krew plugins (SKE community voting)
+# - Node-shell
+# - Modify-secret
+# - Oidc-login
+# - Neat
